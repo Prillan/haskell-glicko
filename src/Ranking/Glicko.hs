@@ -1,3 +1,9 @@
+{-|
+Module      : Ranking.Glicko
+License     : GPL-3
+Maintainer  : prillan91@gmail.com
+Stability   : experimental
+-}
 module Ranking.Glicko
   ( module Ranking.Glicko.Core
   , module Ranking.Glicko.Inference

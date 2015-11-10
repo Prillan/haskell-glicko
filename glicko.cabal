@@ -2,13 +2,13 @@
 -- documentation, see http://haskell.org/cabal/users-guide/
 
 name:                glicko
-version:             0.1.0.0
-synopsis:            Haskell implementation of Glicko-2
-description:         Implementation of the rating algorithm Glicko-2 by
-                     Professor Mark E. Glickman
-                     http://glicko.net/glicko/glicko2.pdf
-
-                     For more info, see https://github.com/Prillan/haskell-glicko
+version:             0.1.1.0
+synopsis:            Glicko-2 implementation in Haskell.
+description:
+    Implementation of the rating algorithm Glicko-2 by Professor Mark E. Glickman
+    <http://glicko.net/glicko/glicko2.pdf>
+    .
+    For more info, see <https://github.com/Prillan/haskell-glicko>
 license:             GPL-3
 license-file:        LICENSE
 author:              Rasmus Précenth

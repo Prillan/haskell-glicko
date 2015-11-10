@@ -1,9 +1,51 @@
+{-|
+Module      : Ranking.Glicko.Core
+License     : GPL-3
+Maintainer  : prillan91@gmail.com
+Stability   : experimental
+
+This module contains the main function, 'compute'. Use this to compute new ratings from
+old ones.
+
+>>> let ps = compute [] [Match 1 2 1 0] def
+>>> ps
+[ Player { _pid = 1
+         , _rating = 1662.3108939062977
+         , _dev = 290.31896371798047
+         , _vol = 5.999967537233814e-2
+         , _inactivity = 0
+         , _age = 1 }
+, Player { _pid = 2
+         , _rating = 1337.6891060937023
+         , _dev = 290.31896371798047
+         , _vol = 5.999967537233814e-2
+         , _inactivity = 0
+         , _age = 1 }]
+>>> compute ps [Match 1 3 0 0] def
+[ Player { _pid = 1
+         , _rating = 1623.996484575735
+         , _dev = 256.3451684359266
+         , _vol = 5.999869083062934e-2
+         , _inactivity = 0
+         , _age = 2 }
+, Player { _pid = 2
+         , _rating = 1337.6891060937023
+         , _dev = 290.5060065906196
+         , _vol = 5.999967537233814e-2
+         , _inactivity = 1
+         , _age = 2 }
+, Player { _pid = 3
+         , _rating = 1557.6214863132009
+         , _dev = 286.9272058793522
+         , _vol = 5.999899836136578e-2
+         , _inactivity = 0
+         , _age = 1 }]
+-}
 module Ranking.Glicko.Core
        ( compute
        , computeP
        , newToOld
-       , oldToNew
-       , glicko2Multiplier) where
+       , oldToNew ) where
 
 import Prelude hiding ((^))
 import qualified Prelude as P
@@ -22,14 +64,21 @@ import Ranking.Glicko.Types
 (^) = (P.^)
 
 -- Run map in parallel
-pMap :: NFData b => Integer -> (a -> b) -> [a] -> [b]
-pMap chunkSize f = withStrategy (parListChunk 100 rdeepseq) . map f
+pMap :: NFData b => Int -> (a -> b) -> [a] -> [b]
+pMap chunkSize f = withStrategy (parListChunk chunkSize rdeepseq) . map f
 
-computeP :: Integer -> [Player] -> [Match] -> GlickoSettings -> [Player]
-computeP chunkSize = compute' (pMap chunkSize)
-
-compute :: [Player] -> [Match] -> GlickoSettings -> [Player]
+-- | Computes new ratings from the previous and adds new ones using the
+-- specified settings.
+compute :: [Player]       -- ^ Input players
+        -> [Match]        -- ^ Matches played this period
+        -> GlickoSettings -- ^ Settings for computing the score values and adding new
+                          -- players.
+        -> [Player]       -- ^ Updated player ratings
 compute = compute' map
+
+-- | Same as 'compute' but runs in parallel using the specified chunkSize
+computeP :: Int -> [Player] -> [Match] -> GlickoSettings -> [Player]
+computeP chunkSize = compute' (pMap chunkSize)
 
 -- Update all player ratings
 compute' :: (((PlayerId, Player) -> Player) -> [(PlayerId, Player)] -> [Player])
@@ -149,12 +198,12 @@ preprocessMatches ps = mapMaybe (
       <*> pure (_scb m)
   )
 
--- Convert ratings from Glicko to Glicko-2
+-- | Convert ratings from Glicko to Glicko-2
 oldToNew :: Player -> Player
 oldToNew p@Player{ _rating = r, _dev = d} = p { _rating = (r - 1500) / glicko2Multiplier
                                               , _dev    = d / glicko2Multiplier }
 
--- Convert ratings from Glicko-2 to Glicko
+-- | Convert ratings from Glicko-2 to Glicko
 newToOld :: Player -> Player
 newToOld p@Player{ _rating = r, _dev = d} = p { _rating = r*glicko2Multiplier + 1500
                                               , _dev    = d*glicko2Multiplier}
