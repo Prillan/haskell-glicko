@@ -1,8 +1,7 @@
 # Glicko
 
 Haskell implementation of the
-[Glicko-2 rating algorithm](http://glicko.net/glicko/glicko2.pdf) by
-Mark Glickman.
+[Glicko-2 rating algorithm](http://glicko.net/glicko/glicko2.pdf) by Professor Mark E. Glickman.
 
 ## Building
 
