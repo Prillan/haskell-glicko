@@ -1,4 +1,6 @@
 # Glicko
+[![Hackage](https://img.shields.io/hackage/v/glicko.svg)](https://hackage.haskell.org/package/glicko)
+[![Dependencies Status](http://img.shields.io/hackage-deps/v/glicko.svg)](http://packdeps.haskellers.com/feed?needle=glicko)
 
 Haskell implementation of the
 [Glicko-2 rating algorithm](http://glicko.net/glicko/glicko2.pdf) by Professor Mark E. Glickman.
