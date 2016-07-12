@@ -43,6 +43,7 @@ test-suite glicko-test
   type:                exitcode-stdio-1.0
   hs-source-dirs:      test
   main-is:             Spec.hs
+  other-modules:       Paper
   build-depends:       base
                      , data-default >= 0.5 && < 0.6
                      , glicko
