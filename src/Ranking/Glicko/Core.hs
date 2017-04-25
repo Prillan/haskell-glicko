@@ -1,3 +1,4 @@
+{-# LANGUAGE RecordWildCards #-}
 {-|
 Module      : Ranking.Glicko.Core
 License     : GPL-3
@@ -9,37 +10,37 @@ old ones.
 
 >>> let ps = compute [] [Match 1 2 1 0] def
 >>> ps
-[ Player { _pid = 1
-         , _rating = 1662.3108939062977
-         , _dev = 290.31896371798047
-         , _vol = 5.999967537233814e-2
-         , _inactivity = 0
-         , _age = 1 }
-, Player { _pid = 2
-         , _rating = 1337.6891060937023
-         , _dev = 290.31896371798047
-         , _vol = 5.999967537233814e-2
-         , _inactivity = 0
-         , _age = 1 }]
+[ Player { playerId = 1
+         , playerRating = 1662.3108939062977
+         , playerDev = 290.31896371798047
+         , playerVol = 5.999967537233814e-2
+         , playerInactivity = 0
+         , playerAge = 1 }
+, Player { playerId = 2
+         , playerRating = 1337.6891060937023
+         , playerDev = 290.31896371798047
+         , playerVol = 5.999967537233814e-2
+         , playerInactivity = 0
+         , playerAge = 1 }]
 >>> compute ps [Match 1 3 0 0] def
-[ Player { _pid = 1
-         , _rating = 1623.996484575735
-         , _dev = 256.3451684359266
-         , _vol = 5.999869083062934e-2
-         , _inactivity = 0
-         , _age = 2 }
-, Player { _pid = 2
-         , _rating = 1337.6891060937023
-         , _dev = 290.5060065906196
-         , _vol = 5.999967537233814e-2
-         , _inactivity = 1
-         , _age = 2 }
-, Player { _pid = 3
-         , _rating = 1557.6214863132009
-         , _dev = 286.9272058793522
-         , _vol = 5.999899836136578e-2
-         , _inactivity = 0
-         , _age = 1 }]
+[ Player { playerId = 1
+         , playerRating = 1623.996484575735
+         , playerDev = 256.3451684359266
+         , playerVol = 5.999869083062934e-2
+         , playerInactivity = 0
+         , playerAge = 2 }
+, Player { playerId = 2
+         , playerRating = 1337.6891060937023
+         , playerDev = 290.5060065906196
+         , playerVol = 5.999967537233814e-2
+         , playerInactivity = 1
+         , playerAge = 2 }
+, Player { playerId = 3
+         , playerRating = 1557.6214863132009
+         , playerDev = 286.9272058793522
+         , playerVol = 5.999899836136578e-2
+         , playerInactivity = 0
+         , playerAge = 1 }]
 -}
 module Ranking.Glicko.Core
        ( compute
@@ -51,7 +52,6 @@ import Prelude hiding ((^))
 import qualified Prelude as P
 
 import Data.Maybe
-import Control.Lens
 import Control.Parallel.Strategies
 import Data.Map (Map)
 import qualified Data.Map.Strict as Map
@@ -87,7 +87,7 @@ compute' :: (((PlayerId, Player) -> Player) -> [(PlayerId, Player)] -> [Player])
          -> GlickoSettings
          -> [Player]
 compute' map' ps ms settings = map' (newToOld . updater . snd) . Map.toList $ pmap'
-  where pmap = Map.fromList $ map (\p -> (_pid p, p)) ps
+  where pmap = Map.fromList $ map (\p -> (playerId p, p)) ps
         pmap' = preprocess pmap ms settings
         matches = preprocessMatches pmap' ms
         updater p = updatePlayer p matches settings
@@ -95,21 +95,21 @@ compute' map' ps ms settings = map' (newToOld . updater . snd) . Map.toList $ pm
 -- Compute new rating for player
 updatePlayer :: Player -> [RatedMatch] -> GlickoSettings -> Player
 updatePlayer p ms GlickoSettings{ tau = tau, scoreFunction = scoreFun }
-  | null matches = (dev        .~ sqrt (pφ^2 + pσ^2))
-                 . (inactivity +~ 1)
-                 . (age        +~ 1) $ p
-  | otherwise    = (dev        .~ φ')
-                 . (rating     .~ µ')
-                 . (vol        .~ σ')
-                 . (inactivity .~ 0)
-                 . (age        +~ 1) $ p
+  | null matches = p { playerDev = sqrt (pφ^2 + pσ^2)
+                     , playerInactivity = playerInactivity p + 1
+                     , playerAge        = playerAge p + 1 }
+  | otherwise    = p { playerDev        = φ'
+                     , playerRating     = µ'
+                     , playerVol        = σ'
+                     , playerInactivity = 0
+                     , playerAge        = playerAge p + 1 }
   where -- Initial values for player
-        pµ = _rating p
-        pφ = _dev p
-        pσ = _vol p
+        pµ = playerRating p
+        pφ = playerDev p
+        pσ = playerVol p
         -- Values for opponent in match `m`
-        µ (_, opp, _, _) = _rating opp
-        φ (_, opp, _, _) = _dev opp
+        µ (_, opp, _, _) = playerRating opp
+        φ (_, opp, _, _) = playerDev opp
         -- Score value for match
         s :: RatedMatch -> Double
         s (_,_,sa,sb) = compareScores scoreFun sa sb
@@ -175,41 +175,41 @@ preprocess ps ms settings =
   Map.map oldToNew
   . Map.union ps
   . Map.fromList
-  . map (\i -> (i, defaultPlayer {_pid=i}))
+  . map (\i -> (i, defaultPlayer { playerId = i }))
   . Set.toList $ diff
-  where playersInMatches = Set.fromList $ (\m -> [_pla m, _plb m]) =<< ms
+  where playersInMatches = Set.fromList $ (\m -> [matchPlayerA m, matchPlayerB m]) =<< ms
         players = Map.keysSet ps
         diff = Set.difference playersInMatches players
-        defaultPlayer = Player { _pid = -1
-                               , _rating = initialRating settings
-                               , _dev = initialDeviation settings
-                               , _vol = initialVolatility settings
-                               , _inactivity = 0
-                               , _age = 0}
+        defaultPlayer = Player { playerId = -1
+                               , playerRating = initialRating settings
+                               , playerDev = initialDeviation settings
+                               , playerVol = initialVolatility settings
+                               , playerInactivity = 0
+                               , playerAge = 0}
 
 
 -- Pull the players into the matches
 preprocessMatches :: Map PlayerId Player -> [Match] -> [RatedMatch]
 preprocessMatches ps = mapMaybe (
     \m -> (,,,)
-      <$> Map.lookup (_pla m) ps
-      <*> Map.lookup (_plb m) ps
-      <*> pure (_sca m)
-      <*> pure (_scb m)
+      <$> Map.lookup (matchPlayerA m) ps
+      <*> Map.lookup (matchPlayerB m) ps
+      <*> pure (matchScoreA m)
+      <*> pure (matchScoreB m)
   )
 
 -- | Convert ratings from Glicko to Glicko-2
 oldToNew :: Player -> Player
-oldToNew p@Player{ _rating = r, _dev = d} = p { _rating = (r - 1500) / glicko2Multiplier
-                                              , _dev    = d / glicko2Multiplier }
+oldToNew p@Player{ playerRating = r, playerDev = d} = p { playerRating = (r - 1500) / glicko2Multiplier
+                                              , playerDev    = d / glicko2Multiplier }
 
 -- | Convert ratings from Glicko-2 to Glicko
 newToOld :: Player -> Player
-newToOld p@Player{ _rating = r, _dev = d} = p { _rating = r*glicko2Multiplier + 1500
-                                              , _dev    = d*glicko2Multiplier}
+newToOld p@Player{ playerRating = r, playerDev = d} = p { playerRating = r*glicko2Multiplier + 1500
+                                              , playerDev    = d*glicko2Multiplier}
 
 glicko2Multiplier :: Double
 glicko2Multiplier = 173.7178
 
 playersToMap :: [Player] -> Map PlayerId Player
-playersToMap = Map.fromList . map (\p -> (_pid p, p))
+playersToMap = Map.fromList . map (\p -> (playerId p, p))

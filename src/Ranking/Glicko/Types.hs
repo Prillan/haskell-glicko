@@ -14,16 +14,10 @@ module Ranking.Glicko.Types
        , PlayerId
        , Score
        , ScoreFunction(..)
-       , GlickoSettings(..)
-       -- * Lenses
-       -- ** Player
-       , pid, rating, dev, vol, inactivity, age
-       -- ** Match
-       , pla, plb, sca, scb )
+       , GlickoSettings(..) )
        where
 
 import           Control.DeepSeq
-import           Control.Lens
 import           Data.Default
 
 type PlayerId = Int
@@ -31,30 +25,28 @@ type PlayerId = Int
 --
 -- (NOTE: The system assumes Glicko ratings, to convert to Glicko-2
 -- , use 'Ranking.Glicko.Core.oldToNew')
-data Player = Player { _pid        :: PlayerId -- ^ Player id, can be anything
-                     , _rating     :: Double   -- ^ Rating
-                     , _dev        :: Double   -- ^ Deviation
-                     , _vol        :: Double   -- ^ Volatility
-                     , _inactivity :: Int      -- ^ Inactivity (not part of Glicko-2),
+data Player = Player { playerId         :: PlayerId -- ^ Player id, can be anything
+                     , playerRating     :: Double   -- ^ Rating
+                     , playerDev        :: Double   -- ^ Deviation
+                     , playerVol        :: Double   -- ^ Volatility
+                     , playerInactivity :: Int      -- ^ Inactivity (not part of Glicko-2),
                                                -- keeps track of the number of rating
                                                -- updates a player has been inactive.
-                     , _age        :: Int      -- ^ Age (not part of Glicko-2),
+                     , playerAge        :: Int      -- ^ Age (not part of Glicko-2),
                                                -- keeps track of the number of rating
                                                -- updates since the player was added.
                      }
   deriving (Show, Eq)
-makeLenses ''Player
 
 instance NFData Player where
   rnf (Player x1 x2 x3 x4 x5 x6) = rnf (x1, x2, x3, x4, x5, x6)
 
 type Score = Int
-data Match = Match { _pla :: PlayerId
-                   , _plb :: PlayerId
-                   , _sca :: Score
-                   , _scb :: Score}
+data Match = Match { matchPlayerA :: PlayerId
+                   , matchPlayerB :: PlayerId
+                   , matchScoreA :: Score
+                   , matchScoreB :: Score}
   deriving (Show, Eq)
-makeLenses ''Match
 
 -- | 'ScoreFunction's are used in 'compute' to evaluate two players performances against
 -- eachother. It should obey the following laws,

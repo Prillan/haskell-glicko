@@ -4,33 +4,33 @@ import Ranking.Glicko
 
 players :: [Player]
 players =
-  [ Player { _pid = 1
-           , _rating = 1500
-           , _dev = 200
-           , _vol = 0.06
-           , _inactivity = 0
-           , _age = 0 }
+  [ Player { playerId = 1
+           , playerRating = 1500
+           , playerDev = 200
+           , playerVol = 0.06
+           , playerInactivity = 0
+           , playerAge = 0 }
 
-  , Player { _pid = 2
-           , _rating = 1400
-           , _dev = 30
-           , _vol = 0.06
-           , _inactivity = 0
-           , _age = 0 }
+  , Player { playerId = 2
+           , playerRating = 1400
+           , playerDev = 30
+           , playerVol = 0.06
+           , playerInactivity = 0
+           , playerAge = 0 }
 
-  , Player { _pid = 3
-           , _rating = 1550
-           , _dev = 100
-           , _vol = 0.06
-           , _inactivity = 0
-           , _age = 0 }
+  , Player { playerId = 3
+           , playerRating = 1550
+           , playerDev = 100
+           , playerVol = 0.06
+           , playerInactivity = 0
+           , playerAge = 0 }
 
-  , Player { _pid = 4
-           , _rating = 1700
-           , _dev = 300
-           , _vol = 0.06
-           , _inactivity = 0
-           , _age = 0 }]
+  , Player { playerId = 4
+           , playerRating = 1700
+           , playerDev = 300
+           , playerVol = 0.06
+           , playerInactivity = 0
+           , playerAge = 0 }]
 
 matches :: [Match]
 matches =

@@ -12,19 +12,19 @@ Example usage:
 >>> :m + Data.Default
 >>> let p1:p2:_ = compute players matches def
 >>> p1
-Player { _pid = 1
-       , _rating = 1464.0506705393013
-       , _dev = 151.51652412385727
-       , _vol = 5.9995984286488495e-2
-       , _inactivity = 0
-       , _age = 1 }
+Player { _pi = 1
+       , playerRating = 1464.0506705393013
+       , playerDev = 151.51652412385727
+       , playerVol = 5.9995984286488495e-2
+       , playerInactivity = 0
+       , playerAge = 1 }
 >>> p2
-Player { _pid = 2
-       , _rating = 1398.1435582337338
-       , _dev = 31.67021528115062
-       , _vol = 5.999912372888531e-2
-       , _inactivity = 0
-       , _age = 1 }
+Player { playerId = 2
+       , playerRating = 1398.1435582337338
+       , playerDev = 31.67021528115062
+       , playerVol = 5.999912372888531e-2
+       , playerInactivity = 0
+       , playerAge = 1 }
 >>> predict p1 p2
 0.5732533698644847     -- Player 1 has a 57.3% chance of winning a single game.
 >>> let Just f = boX 5
@@ -50,8 +50,8 @@ predict :: Player -- ^ Player A
         -> Player -- ^ Player B
         -> Double
 predict pla plb = cumulative dist (ra - rb)
-  where Player { _rating = ra, _dev = da } = oldToNew pla
-        Player { _rating = rb, _dev = db } = oldToNew plb
+  where Player { playerRating = ra, playerDev = da } = oldToNew pla
+        Player { playerRating = rb, playerDev = db } = oldToNew plb
         dist = normalDistr 0 (1 + da + db)
 -- TODO: Check the above ^
 
