@@ -2,7 +2,7 @@
 -- documentation, see http://haskell.org/cabal/users-guide/
 
 name:                glicko
-version:             0.3.0.0
+version:             0.3.0.1
 synopsis:            Glicko-2 implementation in Haskell.
 description:
     Implementation of the rating algorithm Glicko-2 by Professor Mark E. Glickman
@@ -12,7 +12,7 @@ description:
 license:             GPL-3
 license-file:        LICENSE
 author:              Rasmus Précenth
-maintainer:          prillan91@gmail.com
+maintainer:          rasmus@precenth.eu
 -- copyright:
 category:            Math
 build-type:          Simple

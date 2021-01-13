@@ -1,7 +1,7 @@
 {-|
 Module      : Ranking.Glicko.Inference
 License     : GPL-3
-Maintainer  : prillan91@gmail.com
+Maintainer  : rasmus@precenth.eu
 Stability   : experimental
 
 This module provides functions for predicting the outcome of a game between two players.

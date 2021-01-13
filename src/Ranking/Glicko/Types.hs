@@ -1,7 +1,7 @@
 {-|
 Module      : Ranking.Glicko.Types
 License     : GPL-3
-Maintainer  : prillan91@gmail.com
+Maintainer  : rasmus@precenth.eu
 Stability   : experimental
 
 For examples, see `Ranking.Glicko.Core` and `Ranking.Glicko.Inference`.

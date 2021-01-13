@@ -2,7 +2,7 @@
 {-|
 Module      : Ranking.Glicko.Core
 License     : GPL-3
-Maintainer  : prillan91@gmail.com
+Maintainer  : rasmus@precenth.eu
 Stability   : experimental
 
 This module contains the main function, 'compute'. Use this to compute new ratings from

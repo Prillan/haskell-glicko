@@ -1,7 +1,7 @@
 {-|
 Module      : Ranking.Glicko
 License     : GPL-3
-Maintainer  : prillan91@gmail.com
+Maintainer  : rasmus@precenth.eu
 Stability   : experimental
 -}
 module Ranking.Glicko
