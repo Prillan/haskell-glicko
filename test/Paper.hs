@@ -2,7 +2,7 @@ module Paper where
 
 import Ranking.Glicko
 
-players :: [Player]
+players :: [Player 1]
 players =
   [ Player { playerId = 1
            , playerRating = 1500

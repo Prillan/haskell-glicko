@@ -69,23 +69,23 @@ pMap chunkSize f = withStrategy (parListChunk chunkSize rdeepseq) . map f
 
 -- | Computes new ratings from the previous and adds new ones using the
 -- specified settings.
-compute :: [Player]       -- ^ Input players
-        -> [Match]        -- ^ Matches played this period
-        -> GlickoSettings -- ^ Settings for computing the score values and adding new
-                          -- players.
-        -> [Player]       -- ^ Updated player ratings
+compute :: [Player 1]       -- ^ Input players
+        -> [Match]          -- ^ Matches played this period
+        -> GlickoSettings   -- ^ Settings for computing the score values and adding new
+                            -- players.
+        -> [Player 1]       -- ^ Updated player ratings
 compute = compute' map
 
 -- | Same as 'compute' but runs in parallel using the specified chunkSize
-computeP :: Int -> [Player] -> [Match] -> GlickoSettings -> [Player]
+computeP :: Int -> [Player 1] -> [Match] -> GlickoSettings -> [Player 1]
 computeP chunkSize = compute' (pMap chunkSize)
 
 -- Update all player ratings
-compute' :: (((PlayerId, Player) -> Player) -> [(PlayerId, Player)] -> [Player])
-         -> [Player]
+compute' :: (((PlayerId, Player 2) -> Player 1) -> [(PlayerId, Player 2)] -> [Player 1])
+         -> [Player 1]
          -> [Match]
          -> GlickoSettings
-         -> [Player]
+         -> [Player 1]
 compute' map' ps ms settings = map' (newToOld . updater . snd) . Map.toList $ pmap'
   where pmap = Map.fromList $ map (\p -> (playerId p, p)) ps
         pmap' = preprocess pmap ms settings
@@ -93,7 +93,7 @@ compute' map' ps ms settings = map' (newToOld . updater . snd) . Map.toList $ pm
         updater p = updatePlayer p matches settings
 
 -- Compute new rating for player
-updatePlayer :: Player -> [RatedMatch] -> GlickoSettings -> Player
+updatePlayer :: Player 2 -> [RatedMatch] -> GlickoSettings -> Player 2
 updatePlayer p ms GlickoSettings{ tau = tau, scoreFunction = scoreFun }
   | null matches = p { playerDev = sqrt (pφ^2 + pσ^2)
                      , playerInactivity = playerInactivity p + 1
@@ -142,7 +142,7 @@ updatePlayer p ms GlickoSettings{ tau = tau, scoreFunction = scoreFun }
          | pla == p  = m
          | otherwise = (plb, pla, scb, sca)
 
-type RatedMatch = (Player, Player, Score, Score)
+type RatedMatch = (Player 2, Player 2, Score, Score)
 
 -- g and E from step 3-4
 _g :: Double -> Double
@@ -170,7 +170,7 @@ calcSigma delta φ σ v tau = step a b (f a) (f b)
 ε = 0.000001
 
 -- Add new default players where missing
-preprocess :: Map PlayerId Player -> [Match] -> GlickoSettings -> Map PlayerId Player
+preprocess :: Map PlayerId (Player 1) -> [Match] -> GlickoSettings -> Map PlayerId (Player 2)
 preprocess ps ms settings =
   Map.map oldToNew
   . Map.union ps
@@ -189,7 +189,7 @@ preprocess ps ms settings =
 
 
 -- Pull the players into the matches
-preprocessMatches :: Map PlayerId Player -> [Match] -> [RatedMatch]
+preprocessMatches :: Map PlayerId (Player 2) -> [Match] -> [RatedMatch]
 preprocessMatches ps = mapMaybe (
     \m -> (,,,)
       <$> Map.lookup (matchPlayerA m) ps
@@ -199,17 +199,19 @@ preprocessMatches ps = mapMaybe (
   )
 
 -- | Convert ratings from Glicko to Glicko-2
-oldToNew :: Player -> Player
-oldToNew p@Player{ playerRating = r, playerDev = d} = p { playerRating = (r - 1500) / glicko2Multiplier
-                                              , playerDev    = d / glicko2Multiplier }
+oldToNew :: Player 1 -> Player 2
+oldToNew p@Player{ playerRating = r, playerDev = d} =
+  p { playerRating = (r - 1500) / glicko2Multiplier
+    , playerDev    = d / glicko2Multiplier }
 
 -- | Convert ratings from Glicko-2 to Glicko
-newToOld :: Player -> Player
-newToOld p@Player{ playerRating = r, playerDev = d} = p { playerRating = r*glicko2Multiplier + 1500
-                                              , playerDev    = d*glicko2Multiplier}
+newToOld :: Player 2 -> Player 1
+newToOld p@Player{ playerRating = r, playerDev = d} =
+  p { playerRating = r*glicko2Multiplier + 1500
+    , playerDev    = d*glicko2Multiplier}
 
 glicko2Multiplier :: Double
 glicko2Multiplier = 173.7178
 
-playersToMap :: [Player] -> Map PlayerId Player
+playersToMap :: [Player v] -> Map PlayerId (Player v)
 playersToMap = Map.fromList . map (\p -> (playerId p, p))

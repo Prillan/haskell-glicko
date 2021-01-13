@@ -46,8 +46,8 @@ import Statistics.Distribution
 import Statistics.Distribution.Normal
 
 -- | Computes the probability that Player A wins against Player B
-predict :: Player -- ^ Player A
-        -> Player -- ^ Player B
+predict :: Player 1 -- ^ Player A
+        -> Player 1 -- ^ Player B
         -> Double
 predict pla plb = cumulative dist (ra - rb)
   where Player { playerRating = ra, playerDev = da } = oldToNew pla
@@ -72,7 +72,7 @@ fromBoX = coerce
 
 -- | Same as 'predict', but computes the probability that
 -- Player A wins a match played as best-of-X games.
-predictBoX :: BoX -> Player -> Player -> Double
+predictBoX :: BoX -> Player 1 -> Player 1 -> Double
 predictBoX n p1 p2 =
   sum $ map (\i -> fromInteger ((z + i) `choose` i) * p^w * q^i) [0..z]
   where p  = predict p1 p2

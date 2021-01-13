@@ -6,6 +6,7 @@ Stability   : experimental
 
 For examples, see `Ranking.Glicko.Core` and `Ranking.Glicko.Inference`.
 -}
+{-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE TemplateHaskell #-}
 module Ranking.Glicko.Types
        ( -- * Data types
@@ -19,26 +20,27 @@ module Ranking.Glicko.Types
 
 import           Control.DeepSeq
 import           Data.Default
+import           GHC.TypeLits (Nat)
 
 type PlayerId = Int
--- | Data type representing a player's Glicko rating.
---
--- (NOTE: The system assumes Glicko ratings, to convert to Glicko-2
--- , use 'Ranking.Glicko.Core.oldToNew')
-data Player = Player { playerId         :: PlayerId -- ^ Player id, can be anything
-                     , playerRating     :: Double   -- ^ Rating
-                     , playerDev        :: Double   -- ^ Deviation
-                     , playerVol        :: Double   -- ^ Volatility
-                     , playerInactivity :: Int      -- ^ Inactivity (not part of Glicko-2),
-                                               -- keeps track of the number of rating
-                                               -- updates a player has been inactive.
-                     , playerAge        :: Int      -- ^ Age (not part of Glicko-2),
-                                               -- keeps track of the number of rating
-                                               -- updates since the player was added.
+-- | Data type representing a player's Glicko rating. The type
+--  'version' is used to differentiate between Glicko ('Player' 1) and
+--  Glicko-2 ('Player' 2).
+data Player (version :: Nat) =
+  Player { playerId         :: PlayerId -- ^ Player id, can be anything
+         , playerRating     :: Double   -- ^ Rating
+         , playerDev        :: Double   -- ^ Deviation
+         , playerVol        :: Double   -- ^ Volatility
+         , playerInactivity :: Int      -- ^ Inactivity (not part of Glicko-2),
+                                        -- keeps track of the number of rating
+                                        -- updates a player has been inactive.
+         , playerAge        :: Int      -- ^ Age (not part of Glicko-2),
+                                        -- keeps track of the number of rating
+                                        -- updates since the player was added.
                      }
   deriving (Show, Eq)
 
-instance NFData Player where
+instance NFData (Player v) where
   rnf (Player x1 x2 x3 x4 x5 x6) = rnf (x1, x2, x3, x4, x5, x6)
 
 type Score = Int
