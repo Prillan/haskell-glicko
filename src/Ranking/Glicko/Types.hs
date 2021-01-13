@@ -7,7 +7,6 @@ Stability   : experimental
 For examples, see `Ranking.Glicko.Core` and `Ranking.Glicko.Inference`.
 -}
 {-# LANGUAGE KindSignatures #-}
-{-# LANGUAGE TemplateHaskell #-}
 module Ranking.Glicko.Types
        ( -- * Data types
          Player(..)

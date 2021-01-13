@@ -12,7 +12,7 @@ Example usage:
 >>> :m + Data.Default
 >>> let p1:p2:_ = compute players matches def
 >>> p1
-Player { _pi = 1
+Player { playerId = 1
        , playerRating = 1464.0506705393013
        , playerDev = 151.51652412385727
        , playerVol = 5.9995984286488495e-2

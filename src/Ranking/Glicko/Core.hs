@@ -88,14 +88,14 @@ compute' :: (((PlayerId, Player 2) -> Player 1) -> [(PlayerId, Player 2)] -> [Pl
          -> [Player 1]
 compute' map' ps ms settings = map' (newToOld . updater . snd) . Map.toList $ pmap'
   where pmap = Map.fromList $ map (\p -> (playerId p, p)) ps
-        pmap' = preprocess pmap ms settings
+        pmap' = fmap oldToNew (preprocess pmap ms settings)
         matches = preprocessMatches pmap' ms
         updater p = updatePlayer p matches settings
 
 -- Compute new rating for player
 updatePlayer :: Player 2 -> [RatedMatch] -> GlickoSettings -> Player 2
 updatePlayer p ms GlickoSettings{ tau = tau, scoreFunction = scoreFun }
-  | null matches = p { playerDev = sqrt (pφ^2 + pσ^2)
+  | null matches = p { playerDev        = sqrt (pφ^2 + pσ^2)
                      , playerInactivity = playerInactivity p + 1
                      , playerAge        = playerAge p + 1 }
   | otherwise    = p { playerDev        = φ'
@@ -135,7 +135,9 @@ updatePlayer p ms GlickoSettings{ tau = tau, scoreFunction = scoreFun }
 
         -- All matches `p` played in, arranged so that `p` is the first player
         matches :: [RatedMatch]
-        matches = map swap . filter (\(pla, plb, _, _) -> pla == p || plb == p) $ ms
+        matches = map swap
+                  . filter (\(pla, plb, _, _) -> pla == p || plb == p)
+                  $ ms
 
         swap :: RatedMatch -> RatedMatch
         swap m@(pla, plb, sca, scb)
@@ -170,16 +172,16 @@ calcSigma delta φ σ v tau = step a b (f a) (f b)
 ε = 0.000001
 
 -- Add new default players where missing
-preprocess :: Map PlayerId (Player 1) -> [Match] -> GlickoSettings -> Map PlayerId (Player 2)
+preprocess :: Map PlayerId (Player 1)
+           -> [Match]
+           -> GlickoSettings
+           -> Map PlayerId (Player 1)
 preprocess ps ms settings =
-  Map.map oldToNew
-  . Map.union ps
-  . Map.fromList
-  . map (\i -> (i, defaultPlayer { playerId = i }))
-  . Set.toList $ diff
+  Map.union ps
+  . Map.fromSet (\i -> defaultPlayer { playerId = i })
+  $ playersInMatches `Set.difference` players
   where playersInMatches = Set.fromList $ (\m -> [matchPlayerA m, matchPlayerB m]) =<< ms
         players = Map.keysSet ps
-        diff = Set.difference playersInMatches players
         defaultPlayer = Player { playerId = -1
                                , playerRating = initialRating settings
                                , playerDev = initialDeviation settings
@@ -190,13 +192,11 @@ preprocess ps ms settings =
 
 -- Pull the players into the matches
 preprocessMatches :: Map PlayerId (Player 2) -> [Match] -> [RatedMatch]
-preprocessMatches ps = mapMaybe (
-    \m -> (,,,)
-      <$> Map.lookup (matchPlayerA m) ps
-      <*> Map.lookup (matchPlayerB m) ps
-      <*> pure (matchScoreA m)
-      <*> pure (matchScoreB m)
-  )
+preprocessMatches ps = mapMaybe f
+  where f m = do
+          pla <- Map.lookup (matchPlayerA m) ps
+          plb <- Map.lookup (matchPlayerB m) ps
+          pure (pla, plb, matchScoreA m, matchScoreB m)
 
 -- | Convert ratings from Glicko to Glicko-2
 oldToNew :: Player 1 -> Player 2
@@ -207,8 +207,8 @@ oldToNew p@Player{ playerRating = r, playerDev = d} =
 -- | Convert ratings from Glicko-2 to Glicko
 newToOld :: Player 2 -> Player 1
 newToOld p@Player{ playerRating = r, playerDev = d} =
-  p { playerRating = r*glicko2Multiplier + 1500
-    , playerDev    = d*glicko2Multiplier}
+  p { playerRating = r * glicko2Multiplier + 1500
+    , playerDev    = d * glicko2Multiplier}
 
 glicko2Multiplier :: Double
 glicko2Multiplier = 173.7178
