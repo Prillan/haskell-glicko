@@ -2,7 +2,7 @@
 -- documentation, see http://haskell.org/cabal/users-guide/
 
 name:                glicko
-version:             0.3.0.2
+version:             0.3.0.3
 synopsis:            Glicko-2 implementation in Haskell.
 description:
     Implementation of the rating algorithm Glicko-2 by Professor Mark E. Glickman
